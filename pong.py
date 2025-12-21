@@ -3,12 +3,27 @@ import pygame.locals
 import pygame.math
 import random
 
+p1_score = 9
+p2_score = 7
+
 class Game:
     def __init__(self, name = "My Game", screensize = (800,600)):
         print ("Loading game: "+name)
         pygame.init()
 
         Game.game = self
+
+
+        self.font = pygame.font.Font(None, 50)
+        self.text = f"PLAYER 1 Score: {p1_score}" 
+        self.text2 = f"PLAYER 2 Score: {p2_score}" 
+        self.text1 = self.font.render(self.text , True, (200, 200, 200))
+        self.text_rect = self.text1.get_rect()
+        self.text3 = self.font.render(self.text2 , True, (200, 200, 200))
+        self.text_rect2 = self.text3.get_rect()
+        self.text_rect2.centery +=  50
+
+
 
 
         self.sprites = pygame.sprite.Group()
@@ -26,7 +41,7 @@ class Game:
         for event in self.eventlist:
             self.processEvent(event)
         self.sprites.update()
-
+        self.display.blit(self.text1, self.text_rect)
     def processEvent(self, event):
         if event.type == pygame.QUIT:
             self.exit = True
@@ -34,6 +49,10 @@ class Game:
     def draw(self):
         self.display.fill(self.background_colour)
         self.sprites.draw(self.display)
+        self.text = f"PLAYER 1 Score: {p1_score}" 
+        self.text2 = f"PLAYER 2 Score: {p2_score}" 
+        self.display.blit(self.text1, self.text_rect)
+        self.display.blit(self.text3 , self.text_rect2)
 
     def run(self):
         print("run")
@@ -63,11 +82,11 @@ class Ball(pygame.sprite.Sprite):
     def __init__(self,x,y):
         super() .__init__()
         self.image = pygame.image.load("pongball.png")
-        self.image = pygame.transform.scale(self.image,(15,15))
+        self.image = pygame.transform.scale(self.image,(30,30))
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.centery = y
-        self.velocity = pygame.math.Vector2(6,3)
+        self.velocity = pygame.math.Vector2(3,6)
 
     def bounce(self):
 
@@ -86,28 +105,48 @@ class Ball(pygame.sprite.Sprite):
 
 
     
-    def update(self):
+    def update(self ):
         #print(self.velocity)
         #print(self.velocity.x)
+        global p1_score, p2_score
         vx,vy = self.velocity
         self.rect.centerx += vx
         self.rect.centery += vy     
         self.bounce()
         if Game.game.player1.rect.colliderect(self):
             collision_point = self.rect.centery - Game.game.player1.rect.top
-            if collision_point > 40 and collision_point <:
-                print("top collide")
-            self.velocity.x *= -1
-        if Game.game.player1.rect.colliderect(self):
-            self.velocity.x += -1
+            if collision_point > 40 and collision_point <80:
+                self.velocity.x *= -1
+                self.velocity.y *= 0.9
+                
+            if collision_point > 0 and collision_point <40:
+                self.velocity.x *= -1
+                self.velocity.y *= 1.1
+                #self.velocity.y += 5
+                
+        #if Game.game.player1.rect.colliderect(slf):
+          #  self.velocity.x + -1e
            
             #self.rect.centerx *= random.randint(1,5)
         if Game.game.player2.rect.colliderect(self):
-            self.velocity.x = self.velocity.x *-1
+            collision_point2= self.rect.centery - Game.game.player1.rect.top
+            if collision_point2 > 40 and collision_point2 <80:
+                self.velocity.x *= -1
+                self.velocity.y *= 0.9
+                
+            if collision_point2 > 0 and collision_point2 <40:
+                self.velocity.x *= -1
+                self.velocity.y *= 1.1
+                #self.velocity.y += 5
 
+        if self.rect.centerx <= 45 :
+            p2_score +=  1
+            print(p2_score)
 
-
-
+        if self.rect.x >=  785:
+            p1_score  += 1
+            print(p1_score)
+        
 
 class PongGame(Game):
     def __init__(self):
@@ -118,7 +157,7 @@ class PongGame(Game):
         # self.player1.rect = self.player1/image.get_rect()
         self.player1 = Paddle(45,300)
         self.player2 = Paddle(755 ,300)
-        self.ball= Ball(400,300)
+        self.ball = Ball(400,300)
         self.sprites.add(self.player1 , self.player2 , self.ball) 
         control_up = False
         control_down = False
