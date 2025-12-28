@@ -3,8 +3,9 @@ import pygame.locals
 import pygame.math
 import random
 
-p1_score = 9
-p2_score = 7
+p1_score = 0
+p2_score = 0
+increase_score = False
 
 class Game:
     def __init__(self, name = "My Game", screensize = (800,600)):
@@ -15,15 +16,6 @@ class Game:
 
 
         self.font = pygame.font.Font(None, 50)
-        self.text = f"PLAYER 1 Score: {p1_score}" 
-        self.text2 = f"PLAYER 2 Score: {p2_score}" 
-        self.text1 = self.font.render(self.text , True, (200, 200, 200))
-        self.text_rect = self.text1.get_rect()
-        self.text3 = self.font.render(self.text2 , True, (200, 200, 200))
-        self.text_rect2 = self.text3.get_rect()
-        self.text_rect2.centery +=  50
-
-
 
 
         self.sprites = pygame.sprite.Group()
@@ -41,7 +33,7 @@ class Game:
         for event in self.eventlist:
             self.processEvent(event)
         self.sprites.update()
-        self.display.blit(self.text1, self.text_rect)
+        #self.display.blit(self.text1, self.text_rect)
     def processEvent(self, event):
         if event.type == pygame.QUIT:
             self.exit = True
@@ -51,6 +43,13 @@ class Game:
         self.sprites.draw(self.display)
         self.text = f"PLAYER 1 Score: {p1_score}" 
         self.text2 = f"PLAYER 2 Score: {p2_score}" 
+        self.text = f"PLAYER 1 Score: {p1_score}" 
+        self.text2 = f"PLAYER 2 Score: {p2_score}" 
+        self.text1 = self.font.render(self.text , True, (200, 200, 200))
+        self.text_rect = self.text1.get_rect()
+        self.text3 = self.font.render(self.text2 , True, (200, 200, 200))
+        self.text_rect2 = self.text3.get_rect()
+        self.text_rect2.centery +=  50
         self.display.blit(self.text1, self.text_rect)
         self.display.blit(self.text3 , self.text_rect2)
 
@@ -139,14 +138,19 @@ class Ball(pygame.sprite.Sprite):
                 self.velocity.y *= 1.1
                 #self.velocity.y += 5
 
-        if self.rect.centerx <= 45 :
-            p2_score +=  1
-            print(p2_score)
+        global increase_score
+        if self.rect.centerx <= 45 and increase_score:
+                p2_score +=  1
+                print("p2 score")
+                increase_score = False
 
-        if self.rect.x >=  785:
+
+        if self.rect.x >=  772 and increase_score:
             p1_score  += 1
-            print(p1_score)
+            print("p1 score")
         
+        if self.rect.centerx > 45 and  self.rect.centerx < 785:
+            increase_score = True
 
 class PongGame(Game):
     def __init__(self):
@@ -155,8 +159,8 @@ class PongGame(Game):
         # self.player1.image = pygame.Surface([15,80])
         # self.player1.image.fill((0,0,0))
         # self.player1.rect = self.player1/image.get_rect()
-        self.player1 = Paddle(45,300)
-        self.player2 = Paddle(755 ,300)
+        self.player1 = Paddle(75,300)
+        self.player2 = Paddle(725 ,300)
         self.ball = Ball(400,300)
         self.sprites.add(self.player1 , self.player2 , self.ball) 
         control_up = False
@@ -186,15 +190,17 @@ class PongGame(Game):
             if event.key == pygame.K_DOWN:
                 print("down arrow pressed")
                 self.player2.rect.centery = self.player2.rect.centery + 25
-                if self.player2.rect.y <= 0 :
-                    self.player2.rect.y = 0
+                if self.player2.rect.y >= 520 :
+                        self.player2.rect.y = 520
+                
 
             if event.key == pygame.K_UP:
                 print("up arrow pressed")
                 self.player2.rect.centery = self.player2.rect.centery - 25
                 if self.player2.rect.y >= 520 :
                     self.player2.rect.y = 520
-
+                    if self.player2.rect.y <= 0 :
+                        self.player2.rect.y = 0
             
         if event.type == pygame.KEYUP:
             if pygame.locals.K_w:
